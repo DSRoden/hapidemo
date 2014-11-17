@@ -1,9 +1,13 @@
 var port = process.env.PORT;
-
+var db = process.env.DB;
 var Hapi = require('hapi');
 var Joi = require('joi');
-
 var server = new Hapi.Server(port);
+
+var mongoose = require('mongoose');
+mongoose.connect(db);
+
+var Dog = mongoose.model('Dog', { name: String, age: Number, gender: String });
 
 server.route({
     config: {
@@ -16,6 +20,22 @@ server.route({
     handler: function (request, reply) {
         reply('hello world');
     }
+});
+
+
+server.route({
+    method: 'POST',
+    path: '/dogs',
+    handler: function(request, reply) {
+        var puppy = new Dog(request.payload);
+        puppy.save(function(){
+            reply(puppy);
+        });
+    }
+
+    //handler: function(req, reply){
+    //    reply(req.payload);
+    //}
 });
 
 server.route({
